@@ -1,4 +1,4 @@
-name: Playwright Tests
+name: Playwright E2E Tests
 
 on:
   push:
@@ -11,51 +11,21 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    - name: Install dependencies
-      run: npm install  # <-- NDRYSHIMI KËTU
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
-    
-    # DEBUGGING: Check if config exists and test structure
-    - name: Debug - Check project structure
-      run: |
-        echo "=== Project structure ==="
-        ls -la
-        echo "=== Tests directory ==="
-        ls -la tests/
-        echo "=== Playwright config ==="
-        if [ -f "playwright.config.js" ]; then
-          echo "✅ playwright.config.js found"
-        else
-          echo "❌ playwright.config.js missing"
-        fi
-    
-    # FORCE HTML REPORT generation
-    - name: Run Playwright tests with HTML reporter
-      run: npx playwright test --reporter=html
-    
-    # DEBUGGING: Check what was generated
-    - name: Debug - Check generated files
-      run: |
-        echo "=== All files after test ==="
-        ls -la
-        echo "=== Look for report directories ==="
-        find . -type d -name "*report*" || echo "No report directories found"
-        echo "=== Check playwright-report specifically ==="
-        if [ -d "playwright-report" ]; then
-          echo "✅ playwright-report found!"
-          ls -la playwright-report/
-        else
-          echo "❌ playwright-report not found"
-        fi
-    
-    - uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: 'npm'
+      - name: Dependencies installieren
+        run: npm install
+      - name: Playwright Browser installieren
+        run: npx playwright install --with-deps
+      - name: E2E Tests ausführen
+        run: npx playwright test
+      - name: Testbericht hochladen
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
